@@ -1,0 +1,240 @@
+<html>
+  <body>
+    <p>Click the button to update circles.</p>
+
+    <button
+      onclick="ChangeCircles(Rscore, Gscore, Bscore, Rstyles,Gstyles,Bstyles)"
+    >
+      Rerun
+    </button>
+    <br /><br /><b> Target Circle: </b><br />
+    <canvas
+      id="canvas2"
+      width="600"
+      height="150"
+      style="border: 1px solid #d3d3d3;"
+    >
+      Your browser does not support the HTML5 canvas tag.</canvas
+    ><br />
+    <canvas
+      id="myCanvas"
+      width="600"
+      height="150"
+      style="border: 1px solid #d3d3d3;"
+    >
+      Your browser does not support the HTML5 canvas tag.</canvas
+    >
+
+    <p id="demo"></p>
+
+    <script>
+      var speed = 30;
+      var target = [200, 100, 255];
+      var circles = document.getElementById("myCanvas").getContext("2d");
+      var circles2 = document.getElementById("canvas2").getContext("2d");
+      var targetcolor =
+        "RGB(" + target[0] + "," + target[1] + "," + target[2] + ")";
+      var targettext = "<br/> Target: " + target + "<br/>";
+      var i;
+      var supertext = [];
+      var Rstyles = [];
+      var Gstyles = [];
+      var Bstyles = [];
+      var Rscore = [];
+      var Gscore = [];
+      var Bscore = [];
+      var totalscore;
+      var fullscore = [];
+
+      // Start:
+      MakeCircles(); // start with circles
+      function begincircles() {
+        ChangeCircles(Rscore, Gscore, Bscore, Rstyles, Gstyles, Bstyles), speed;
+      }
+      var startcircles = setInterval(begincircles, speed);
+      function MakeCircles() {
+        var text = "";
+
+        for (i = 0; i < 6; i++) {
+          var a = 255 * Math.random();
+          var b = 255 * Math.random();
+          var c = 255 * Math.random();
+          Rstyles[i] = a;
+          Gstyles[i] = b;
+          Bstyles[i] = c;
+          var colors = "RGB(" + a + "," + b + "," + c + ")";
+
+          DrawCircles(circles, colors);
+          text += WriteText(a, b, c, text, i);
+          Rscore[i] = Scoring(a, 0);
+          console.log("Rscore: " + Rscore);
+          Gscore[i] = Scoring(a, 1);
+          Bscore[i] = Scoring(a, 2);
+          supertext[i] = [Rscore[i], Gscore[i], Bscore[i]];
+        }
+        document.getElementById("demo").innerHTML =
+          text +
+          targettext +
+          "<br> Superscore: " +
+          supertext +
+          "<br> Total Score: " +
+          Math.max(...fullscore);
+
+        return Rstyles, Gstyles, Bstyles, Rscore, Gscore, Bscore;
+      }
+
+      function ChangeCircles(
+        Rscore,
+        Gscore,
+        Bscore,
+        Rstyles,
+        Gstyles,
+        Bstyles
+      ) {
+        //for R, G, and B
+        // 1. find minscore
+        RMax = Math.max(...Rscore);
+        RMin = Math.min(...Rscore);
+        GMax = Math.max(...Gscore);
+        GMin = Math.min(...Gscore);
+        BMin = Math.min(...Bscore);
+        BMax = Math.max(...Bscore);
+        var Rmaxdex = Rscore.indexOf(RMax);
+        var Gmaxdex = Gscore.indexOf(GMax);
+        var Bmaxdex = Bscore.indexOf(BMax);
+        var Rmindex = Rscore.indexOf(RMin);
+        var Gmindex = Gscore.indexOf(GMin);
+        var Bmindex = Bscore.indexOf(BMin);
+        console.log(
+          "Rstyles: " + Rstyles + "mindex, maxdex " + Rmindex + Rmaxdex
+        );
+        console.log("Gstyles: " + Gstyles);
+        console.log("Bstyles: " + Bstyles);
+        var plusOrMinus = Math.random() < 0.5 ? -1 : 1; //random + or -
+        var change = plusOrMinus * 255 * Math.pow(Math.random(), 8);
+        console.log("GMaxdex " + Gmaxdex + "Gstyles " + Gstyles[1]);
+        var newRMin = (Rstyles[Rmindex] + Rstyles[Rmaxdex]) / 2 + change;
+        var newGMin = (Gstyles[Gmindex] + Gstyles[Gmaxdex]) / 2 + change;
+        var newBMin = (Bstyles[Bmindex] + Bstyles[Bmaxdex]) / 2 + change;
+        console.log(
+          "new RGB min -> R " + newRMin + " G " + newGMin + " B " + newBMin
+        );
+        Rstyles.splice(
+          Rmindex,
+          1,
+          (Rstyles[Rmindex] + Rstyles[Rmaxdex]) / 2 + change
+        );
+        Gstyles.splice(
+          Gmindex,
+          1,
+          (Gstyles[Gmindex] + Gstyles[Gmaxdex]) / 2 + change
+        );
+        Bstyles.splice(
+          Bmindex,
+          1,
+          (Bstyles[Bmindex] + Bstyles[Bmaxdex]) / 2 + change
+        );
+
+        console.log("Rstyles 2: " + Rstyles);
+        console.log("Gstyles 2: " + Gstyles);
+        console.log("Bstyles 2: " + Bstyles);
+        // 2. find maxscore
+        // 3. apply (max + min)/2 + change
+
+        var text = "";
+
+        for (i = 0; i < 6; i++) {
+          a = Rstyles[i];
+          b = Gstyles[i];
+          c = Bstyles[i];
+          console.log("a b c " + a + b + c);
+          var colors = "RGB(" + a + "," + b + "," + c + ")";
+
+          DrawCircles(circles, colors);
+          text += WriteText(a, b, c, text, i);
+          //   GetScore(a, b, c, i);
+
+          Rscore[i] = Scoring(a, 0);
+          Gscore[i] = Scoring(b, 1);
+          Bscore[i] = Scoring(c, 2);
+          totalscore =
+            StraightScoring(a, 0) +
+            StraightScoring(b, 1) +
+            StraightScoring(c, 2);
+          if (totalscore >= 2.8) {
+            var stuff = document.getElementById("demo");
+num = i+1
+            stuff.innerHTML += "Extra stuff";
+            targettext += "<br> Circle " + num + " won the algorithm";
+            clearInterval(startcircles);
+          }
+          fullscore[i] = totalscore;
+          supertext[i] = [Rscore[i], Gscore[i], Bscore[i]];
+        }
+        document.getElementById("demo").innerHTML =
+          text +
+          targettext +
+          "<br> Total Score: " +
+          decimals(Math.max(...fullscore));
+
+        return Rstyles, Gstyles, Bstyles, Rscore, Gscore, Bscore, fullscore;
+      }
+
+      function DrawCircles(canvas, color) {
+        canvas.strokeStyle = color;
+        canvas.fillStyle = color;
+        canvas.beginPath();
+        canvas.arc(100 * i + 50, 75, 50, 0, 2 * Math.PI);
+        canvas.stroke();
+        canvas.fill();
+      }
+
+      function Scoring(value, RGB) {
+        score1 = Math.abs(value - target[RGB]);
+        randscore = 1 / (score1 * Math.pow(Math.random(), 3) + 1);
+        return decimals(randscore);
+      }
+
+      function StraightScoring(value, RGB) {
+        score1 = Math.abs(value - target[RGB]);
+        straightscore = 1 / (score1 + 1);
+        return decimals(straightscore);
+      }
+
+      // Draw target circle
+      i = 2.5;
+      DrawCircles(circles2, targetcolor);
+      i = 0;
+
+      function WriteText(a, b, c, text, i) {
+num = i+1
+        text =
+          "RGB for circle " +
+          num +
+          " is " +
+          decimals(a) +
+          ", " +
+          decimals(b) +
+          ", " +
+          decimals(c) +
+          "<br>";
+
+        return text;
+      }
+
+      function decimals(num) {
+        return Math.round(num * 100) / 100;
+      }
+
+       function prettyscore(scores) {
+        rescore = [];
+        var count = 0;
+        scores.forEach((score) => {
+          rescore[count] = decimals(score);
+          count++;
+        });
+        console.log(rescore);
+      }
+ </script>
+  </body>
+</html>
